@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a1410">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Claude Remote">
+  <title>Claude Remote</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./favicon.ico" sizes="32x32">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <!-- Machine Setup Screen -->
+  <div id="setup-screen" class="setup-screen">
+    <div class="setup-box">
+      <h1>Claude Remote</h1>
+      <p>Add your machines</p>
+
+      <!-- Shared token input -->
+      <div class="setup-token-field">
+        <input type="password" id="setup-token" placeholder="Auth token" autocomplete="off">
+      </div>
+
+      <!-- Known machines from server -->
+      <div id="known-machines" class="known-machines hidden">
+        <div class="setup-section-label">Known Machines</div>
+        <div id="known-machines-grid" class="known-machines-grid"></div>
+      </div>
+
+      <!-- Already-added machines -->
+      <div id="setup-machine-list" class="setup-machine-list"></div>
+
+      <!-- Collapsible manual entry -->
+      <button id="manual-toggle" class="manual-toggle-btn">+ Add custom machine</button>
+      <div id="manual-form" class="setup-form hidden">
+        <input type="text" id="setup-name" placeholder="Machine name (e.g. desktop)" autocomplete="off">
+        <input type="url" id="setup-url" placeholder="URL (e.g. http://100.122.249.71:3456)" autocomplete="off">
+        <button id="setup-add" class="setup-add-btn">Add Machine</button>
+      </div>
+
+      <button id="setup-continue" class="setup-continue-btn hidden">Continue</button>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app" class="app hidden">
+    <!-- Offline banner -->
+    <div id="offline-banner" class="offline-banner hidden">Offline — showing cached data</div>
+
+    <!-- Connection status bar -->
+    <div id="connection-status" class="connection-status hidden"></div>
+
+    <!-- Session List View (Home) -->
+    <div id="session-list-view" class="session-list-view">
+      <header class="header">
+        <span class="header-title">Sessions</span>
+        <span id="session-count" class="session-count"></span>
+        <button id="notify-btn" class="icon-btn notify-btn hidden" aria-label="Enable Notifications" title="Enable notifications">&#128276;</button>
+        <button id="machines-btn" class="icon-btn" aria-label="Machines" title="Manage machines">&#9881;</button>
+        <button id="refresh-btn" class="icon-btn" aria-label="Refresh">&#8635;</button>
+      </header>
+      <div id="usage-bar" class="usage-bar hidden"></div>
+      <div id="session-list" class="session-list"></div>
+      <button id="new-session-fab" class="fab" title="New Session">+</button>
+    </div>
+
+    <!-- Chat View -->
+    <div id="chat-view" class="chat-view hidden">
+      <header class="header chat-header">
+        <button id="back-btn" class="icon-btn" aria-label="Back">&#8592;</button>
+        <div class="chat-header-info">
+          <span id="chat-project" class="chat-project">Project</span>
+          <span id="chat-machine" class="machine-badge hidden"></span>
+          <span id="chat-status" class="chat-status-badge">idle</span>
+        </div>
+        <span id="chat-branch" class="chat-branch"></span>
+      </header>
+
+      <main id="chat-area" class="chat-area">
+        <div id="messages" class="messages"></div>
+      </main>
+
+      <!-- Interactive input bar -->
+      <div id="input-bar" class="input-bar">
+        <textarea id="msg-input" placeholder="Type message..." rows="1"></textarea>
+        <button id="send-btn" class="send-btn">&#10148;</button>
+      </div>
+
+      <!-- Read-only bar (for running sessions) -->
+      <div id="readonly-bar" class="readonly-bar hidden">
+        <div class="readonly-pulse"></div>
+        <span>Live feed — session is running</span>
+        <button id="takeover-btn" class="takeover-btn">Take Over</button>
+      </div>
+    </div>
+
+    <!-- Project Picker Modal -->
+    <div id="project-modal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>New Session</h3>
+          <button id="project-modal-close" class="icon-btn">&times;</button>
+        </div>
+        <div id="project-list" class="project-list"></div>
+      </div>
+    </div>
+
+    <!-- Permission modal -->
+    <div id="perm-modal" class="perm-modal hidden">
+      <div class="perm-backdrop"></div>
+      <div class="perm-dialog">
+        <h3>Permission Required</h3>
+        <p id="perm-tool" class="perm-tool"></p>
+        <pre id="perm-desc" class="perm-desc"></pre>
+        <div class="perm-buttons">
+          <button id="perm-approve" class="perm-btn perm-approve">Approve</button>
+          <button id="perm-deny" class="perm-btn perm-deny">Deny</button>
+        </div>
+        <p class="perm-timeout">Auto-denies in <span id="perm-countdown">60</span>s</p>
+      </div>
+    </div>
+
+    <!-- Rename session modal -->
+    <div id="rename-modal" class="rename-modal hidden">
+      <div class="rename-backdrop"></div>
+      <div class="rename-dialog">
+        <h3>Rename Session</h3>
+        <input type="text" id="rename-input" class="rename-input" placeholder="Session name" autocomplete="off">
+        <div class="rename-buttons">
+          <button id="rename-cancel" class="rename-btn rename-cancel">Cancel</button>
+          <button id="rename-save" class="rename-btn rename-save">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings modal -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-dialog settings-dialog">
+        <div class="modal-header">
+          <h3>Settings</h3>
+          <button id="settings-modal-close" class="icon-btn">&times;</button>
+        </div>
+
+        <div class="settings-body">
+          <!-- Connected machines -->
+          <div id="settings-machine-list" class="settings-machine-list"></div>
+
+          <!-- Add machine (collapsed) -->
+          <button id="settings-add-toggle" class="manual-toggle-btn">+ Add machine</button>
+          <div id="settings-add-section" class="settings-add-section hidden">
+            <div class="setup-token-field">
+              <input type="password" id="settings-token" placeholder="Auth token" autocomplete="off">
+            </div>
+            <div id="settings-known-machines" class="known-machines hidden">
+              <div class="setup-section-label">Known Machines</div>
+              <div id="settings-known-grid" class="known-machines-grid"></div>
+            </div>
+            <button id="settings-manual-toggle" class="manual-toggle-btn">+ Add custom machine</button>
+            <div id="settings-manual-form" class="setup-form hidden">
+              <input type="text" id="settings-add-name" placeholder="Machine name" autocomplete="off">
+              <input type="url" id="settings-add-url" placeholder="URL (e.g. http://100.122.249.71:3456)" autocomplete="off">
+              <button id="settings-add-btn" class="setup-add-btn">Add Machine</button>
+            </div>
+          </div>
+
+          <!-- SW version footer -->
+          <div id="settings-sw-version" class="settings-footer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/markdown.js"></script>
+  <script src="./js/ws.js"></script>
+  <script type="module" src="./js/machines.js"></script>
+  <script type="module" src="./js/multi-ws.js"></script>
+  <script type="module" src="./js/offline-store.js"></script>
+  <script type="module" src="./js/chat.js"></script>
+  <script type="module" src="./js/sessions-ui.js"></script>
+  <script type="module" src="./js/permission.js"></script>
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

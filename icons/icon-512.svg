@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Purple circle background -->
+  <circle cx="256" cy="256" r="256" fill="#6c63ff"/>
+  
+  <!-- White "C" letter -->
+  <text x="256" y="332" font-size="320" font-weight="bold" font-family="Arial, sans-serif" fill="white" text-anchor="middle">C</text>
+</svg>
