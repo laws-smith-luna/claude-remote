@@ -108,34 +108,39 @@ function renderSetupMachineList() {
 // --- Known Machines (from server) ---
 
 async function fetchKnownMachines() {
-  // Try fetching from the current origin (the server we loaded from)
+  let allKnown = [];
+
+  // Try fetching from the current origin's API (works when served from a machine)
   const origin = `${location.protocol}//${location.host}`;
   try {
     const res = await fetch(`${origin}/api/known-machines`);
-    if (!res.ok) return;
-    const data = await res.json();
-
-    // Build list: self (this server) + peers
-    const allKnown = [];
-
-    // Add self — the server we're connected to
-    if (data.self?.name) {
-      allKnown.push({ name: data.self.name, url: origin });
-    }
-
-    // Add peers
-    if (data.peers?.length) {
-      for (const peer of data.peers) {
-        allKnown.push({ name: peer.name, url: peer.url.replace(/\/+$/, "") });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.self?.name) {
+        allKnown.push({ name: data.self.name, url: origin });
+      }
+      if (data.peers?.length) {
+        for (const peer of data.peers) {
+          allKnown.push({ name: peer.name, url: peer.url.replace(/\/+$/, "") });
+        }
       }
     }
-
-    if (allKnown.length === 0) return;
-
-    renderKnownMachines(allKnown);
   } catch {
-    // Server might not support this endpoint — silently ignore
+    // Not served from a machine (e.g. GitHub Pages) — try static fallback
   }
+
+  // Fallback: static known-machines.json baked in during deploy
+  if (allKnown.length === 0) {
+    try {
+      const res = await fetch("./known-machines.json");
+      if (res.ok) {
+        allKnown = await res.json();
+      }
+    } catch { /* no static config available */ }
+  }
+
+  if (allKnown.length === 0) return;
+  renderKnownMachines(allKnown);
 }
 
 function renderKnownMachines(knownList) {
