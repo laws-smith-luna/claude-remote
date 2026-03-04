@@ -1,4 +1,4 @@
-const CACHE_NAME = "claude-remote-v24";
+const CACHE_NAME = "claude-remote-v25";
 const STATIC_ASSETS = [
   "/claude-remote/",
   "/claude-remote/css/style.css",

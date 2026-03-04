@@ -152,9 +152,11 @@ function renderKnownMachines(knownList) {
     return `
       <div class="known-machine-card ${isAdded ? "added" : ""}"
            data-name="${esc(km.name)}" data-url="${esc(km.url)}">
+        <div class="known-machine-card-info">
+          <div class="known-machine-card-name">${esc(km.name)}</div>
+          <div class="known-machine-card-url">${esc(km.url)}</div>
+        </div>
         <span class="known-machine-card-check">&#10003;</span>
-        <div class="known-machine-card-name">${esc(km.name)}</div>
-        <div class="known-machine-card-url">${esc(km.url)}</div>
       </div>
     `;
   }).join("");
@@ -821,9 +823,11 @@ async function fetchSettingsKnownMachines() {
     return `
       <div class="known-machine-card ${isAdded ? "added" : ""}"
            data-name="${esc(km.name)}" data-url="${esc(km.url)}">
+        <div class="known-machine-card-info">
+          <div class="known-machine-card-name">${esc(km.name)}</div>
+          <div class="known-machine-card-url">${esc(km.url)}</div>
+        </div>
         <span class="known-machine-card-check">&#10003;</span>
-        <div class="known-machine-card-name">${esc(km.name)}</div>
-        <div class="known-machine-card-url">${esc(km.url)}</div>
       </div>
     `;
   }).join("");

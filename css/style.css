@@ -1320,7 +1320,7 @@ html, body {
 
 .known-machines-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 8px;
 }
 
@@ -1328,9 +1328,11 @@ html, body {
   background: var(--bg-card);
   border: 1px solid #3a3028;
   border-radius: 10px;
-  padding: 14px 12px;
+  padding: 12px 14px;
   cursor: pointer;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   transition: border-color 0.15s, background 0.15s;
   position: relative;
 }
@@ -1346,7 +1348,6 @@ html, body {
 .known-machine-card-name {
   font-weight: 600;
   font-size: 15px;
-  margin-bottom: 4px;
 }
 
 .known-machine-card-url {
@@ -1357,13 +1358,19 @@ html, body {
   white-space: nowrap;
 }
 
+.known-machine-card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .known-machine-card-check {
-  position: absolute;
-  top: 6px;
-  right: 8px;
   color: var(--green);
   font-size: 16px;
   display: none;
+  flex-shrink: 0;
 }
 
 .known-machine-card.added .known-machine-card-check {
